@@ -1,0 +1,6 @@
+pypdf
+pillow
+reportlab
+fastapi
+uvicorn[standard]
+python-multipart

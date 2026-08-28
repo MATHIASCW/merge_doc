@@ -1,101 +1,119 @@
 # PDF, Image, and Word Document Merger
 
-A small Python script that automatically merges the files found in the
-`output/` folder into a single PDF:
+A small Python application that merges PDF files, images, and Word/OpenDocument files into a single PDF. It provides both a command-line interface and a local React web interface.
+
+Supported input formats:
 
 - **PDF** (`.pdf`)
 - **Images** (`.png`, `.jpg`, `.jpeg`)
-- **Word / OpenDocument files** (`.docx`, `.doc`, `.odt`)
+- **Word/OpenDocument files** (`.docx`, `.doc`, `.odt`)
 
-The result is saved in the `input/` folder. Images and documents are
-automatically converted to PDF before being added to the final file.
+Images and documents are automatically converted to PDF before they are added to the final file.
 
 ## Project structure
 
 ```
-pdf-merger/
-├── merge_pdfs.py     # the script
-├── output/           # ← place the PDFs to merge here
-├── input/             # ← the merged PDF will be created here
+merge_doc/
+├── main.py           # CLI and PDF merge engine
+├── api.py            # Local FastAPI backend for the React interface
+├── requirements.txt  # Python dependencies
+├── frontend/         # React/Vite interface
+├── input/            # Default source folder for the CLI
+├── output/           # Default destination folder for merged PDFs
 └── README.md
 ```
 
-> All files (PDF, images, documents) are merged in alphabetical order
-> based on their file name, regardless of format. If you want a specific
-> order, prefix them with numbers, for example:
-> `01_intro.pdf`, `02_photo.png`, `03_annex.docx`...
+When using the CLI, files are merged in alphabetical order by filename. To define a custom order, prefix filenames with numbers, for example:
+`01_intro.pdf`, `02_photo.png`, `03_annex.docx`.
 
 ## Installation
 
-You need Python 3 and the following libraries:
+You need Python 3 and the dependencies listed in `requirements.txt`:
 
 ```bash
-pip install pypdf pillow
+pip install -r requirements.txt
 ```
 
-Additionally, to convert Word documents (`.docx`, `.doc`, `.odt`) to
-PDF, the script uses **LibreOffice** from the command line (`soffice`).
-It must be installed on your machine:
+To convert Word and OpenDocument files (`.docx`, `.doc`, `.odt`) to PDF, the application uses **LibreOffice** through the `soffice` command. LibreOffice must be installed and available in your system `PATH`.
 
-- **Windows / macOS**: install [LibreOffice](https://www.libreoffice.org/download/download/)
-  (the `soffice` command must be available in your PATH).
-- **Linux (Debian/Ubuntu)**:
+- **Windows/macOS:** install [LibreOffice](https://www.libreoffice.org/download/download/).
+- **Debian/Ubuntu:**
+
   ```bash
   sudo apt install libreoffice
   ```
 
-> If you're only merging PDFs and images, LibreOffice is not required.
+> LibreOffice is not required when merging only PDFs and images.
 
-## Usage
+## Command-line usage
 
-### 1. Basic usage (default)
+### Merge files from the default source folder
 
-1. Put all the files you want to merge (PDF, PNG, JPG/JPEG,
-   DOCX...) in the `output/` folder.
-2. Run:
+Place the files to merge in `input/`, then run:
 
 ```bash
-python merge_pdfs.py
+python main.py
 ```
 
-3. The result will automatically be created at `input/merged.pdf`.
+The merged PDF is created at `output/merged.pdf`.
 
-### 2. Choose a different source folder
+### Choose a different source folder
 
 ```bash
-python merge_pdfs.py --folder path/to/another/folder
+python main.py --folder path/to/another/folder
 ```
 
-### 3. Choose the output file name/location
+### Choose a different output path
 
 ```bash
-python merge_pdfs.py -o input/my_final_document.pdf
+python main.py -o output/my_final_document.pdf
 ```
 
-### 4. Merge specific files, in a chosen order
+### Merge specific files in a chosen order
 
-You can also skip the `output/` folder and pass the files directly,
-in the desired order (formats can be mixed):
+You can pass files directly and mix supported formats:
 
 ```bash
-python merge_pdfs.py file1.pdf photo.png report.docx -o input/result.pdf
+python main.py file1.pdf photo.png report.docx -o output/result.pdf
 ```
 
-## Options summary
+## React web interface
 
-| Option           | Description                                              | Default value          |
-|------------------|-----------------------------------------------------------|-------------------------|
-| `files`          | List of specific files to merge (optional)                 | (none)                  |
-| `--folder`       | Source folder containing the files to merge                | `output/`                |
-| `-o`, `--output` | Output PDF file                                             | `input/merged.pdf`      |
-| `--watermark`        | Watermark text to apply on each page (optional)         | (none)                   |
-| `--watermark-opacity` | Watermark opacity, from 0 (invisible) to 1 (opaque)    | `0.15`                    |
-| `--watermark-size`    | Watermark font size, in points                         | `40`                      |
+The web interface uses the local Python API. Open two terminals from the project root.
+
+### Terminal 1: start the Python API
+
+```bash
+python -m uvicorn api:app --reload --port 8000
+```
+
+### Terminal 2: start the React frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open the URL shown by Vite, usually `http://localhost:5173`.
+
+You can drop files into the interface, reorder them by dragging, configure an optional watermark, and click **Merge files**. The PDF is saved in `output/` and downloaded automatically.
+
+## Command-line options
+
+| Option | Description | Default |
+|---|---|---|
+| `files` | Specific files to merge, in the desired order | None |
+| `--folder` | Source folder when no files are provided | `input/` |
+| `-o`, `--output` | Destination PDF path | `output/merged.pdf` |
+| `--watermark` | Text to apply to every page | None |
+| `--watermark-opacity` | Watermark opacity from 0 (invisible) to 1 (opaque) | `0.15` |
+| `--watermark-size` | Watermark font size in points | `40` |
 
 ## Supported formats
 
-| Format                  | Extensions            | Conversion required |
-|--------------------------|------------------------|-----------------------|
-| PDF                      | `.pdf`                | No                    |
-| Images                   | `.png`, `.jpg`, `.jpeg`| Yes (via Pillow)      |
-| Word/OpenDoc documents   | `.docx`, `.doc`, `.odt`| Yes (via LibreOffice) |
+| Format | Extensions | Conversion required |
+|---|---|---|
+| PDF | `.pdf` | No |
+| Images | `.png`, `.jpg`, `.jpeg` | Yes, via Pillow |
+| Word/OpenDocument files | `.docx`, `.doc`, `.odt` | Yes, via LibreOffice |
