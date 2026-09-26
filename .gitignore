@@ -1,0 +1,10 @@
+*.pdf*
+.env
+*.jpg*
+*.docx*
+*.odt*
+frontend/node_modules/
+frontend/dist/
+__pycache__/
+*input/
+*output/
