@@ -14,12 +14,17 @@ Images and documents are automatically converted to PDF before they are added to
 
 ```
 merge_doc/
-├── main.py           # CLI and PDF merge engine
-├── api.py            # Local FastAPI backend for the React interface
-├── requirements.txt  # Python dependencies
-├── frontend/         # React/Vite interface
-├── input/            # Default source folder for the CLI
-├── output/           # Default destination folder for merged PDFs
+├── backend/
+│   ├── main.py
+│   ├── api.py
+│   ├── requirements.txt
+│   ├── input/
+│   └── output/
+├── frontend/
+│   ├── src/
+│   ├── package.json
+│   └── .gitignore        # node_modules/, dist/
+├── .gitignore
 └── README.md
 ```
 
